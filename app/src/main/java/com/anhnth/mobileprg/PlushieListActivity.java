@@ -1,4 +1,4 @@
-package com.example.prm_swd;
+package com.anhnth.mobileprg;
 
 import android.os.Bundle;
 import android.widget.ArrayAdapter;

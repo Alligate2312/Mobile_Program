@@ -1,4 +1,4 @@
-package com.example.prm_swd;
+package com.anhnth.mobileprg;
 
 import android.app.AlertDialog;
 import android.database.Cursor;
