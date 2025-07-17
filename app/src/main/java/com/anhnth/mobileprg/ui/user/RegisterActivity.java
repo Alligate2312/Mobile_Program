@@ -3,6 +3,9 @@ package com.anhnth.mobileprg.ui.user;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,13 +15,16 @@ import com.anhnth.mobileprg.models.requests.RegisterRequest;
 import com.anhnth.mobileprg.models.responses.RegisterResponse;
 import com.anhnth.mobileprg.repositories.UserRepository;
 
+import java.util.Date;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class RegisterActivity extends AppCompatActivity {
-    EditText nameInput, emailInput, passwordInput, confirmPasswordInput, dobInput;
+    EditText emailEditText, passwordEditText, confirmPasswordEditText;
     Button registerButton;
+    TextView loginLink;
     UserRepository userRepository;
 
     @Override
@@ -26,36 +32,42 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        nameInput = findViewById(R.id.name_input);
-        emailInput = findViewById(R.id.email_input);
-        passwordInput = findViewById(R.id.password_input);
-        confirmPasswordInput = findViewById(R.id.confirm_password_input);
-        dobInput = findViewById(R.id.dob_input);
-        registerButton = findViewById(R.id.register_button);
-        userRepository = new UserRepository();
+        emailEditText = findViewById(R.id.emailEditText);
+        passwordEditText = findViewById(R.id.passwordEditText);
+        confirmPasswordEditText = findViewById(R.id.confirmPasswordEditText);
+        registerButton = findViewById(R.id.registerButton);
+        loginLink = findViewById(R.id.loginLink);
 
-        registerButton.setOnClickListener(view -> {
-            String name = nameInput.getText().toString();
-            String email = emailInput.getText().toString();
-            String password = passwordInput.getText().toString();
-            String confirmedPassword = confirmPasswordInput.getText().toString();
-            String dob = dobInput.getText().toString();
+        userRepository = new UserRepository(this);
 
-            RegisterRequest request = new RegisterRequest(name, email, password, confirmedPassword, dob);
+        registerButton.setOnClickListener(v -> {
+            String email = emailEditText.getText().toString();
+            String password = passwordEditText.getText().toString();
+            String confirmPassword = confirmPasswordEditText.getText().toString();
+            Date date = new Date();
+
+            if (!password.equals(confirmPassword)) {
+                Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            RegisterRequest request = new RegisterRequest(
+                    "", // name hardcoded or retrieved from another field
+                    email,
+                    password,
+                    confirmPassword,
+                    date.toString()
+            );
 
             userRepository.registerUser(request).enqueue(new Callback<RegisterResponse>() {
                 @Override
-                public void onResponse(Call<RegisterResponse> call,
-                                       Response<RegisterResponse> response) {
+                public void onResponse(Call<RegisterResponse> call, Response<RegisterResponse> response) {
                     if (response.isSuccessful()) {
-                        Toast.makeText(RegisterActivity.this, "Register Success",
-                                Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-                        startActivity(intent);
+                        Toast.makeText(RegisterActivity.this, "Registered Successfully", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
                         finish();
                     } else {
-                        Toast.makeText(RegisterActivity.this, "Register Failed", Toast.LENGTH_SHORT)
-                                .show();
+                        Toast.makeText(RegisterActivity.this, "Registration Failed", Toast.LENGTH_SHORT).show();
                     }
                 }
 
@@ -65,6 +77,11 @@ public class RegisterActivity extends AppCompatActivity {
                     Toast.makeText(RegisterActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
+        });
+
+        loginLink.setOnClickListener(v -> {
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
         });
     }
 }
